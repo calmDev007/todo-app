@@ -1,0 +1,65 @@
+name: CI/CD Pipeline
+
+# When to run this workflow
+on:
+  push:
+    branches: [ main ]  # Run when code is pushed to main branch
+  pull_request:
+    branches: [ main ]  # Run when a pull request is created
+
+# Define jobs to run
+jobs:
+  # Job 1: Test Backend
+  test-backend:
+    runs-on: ubuntu-latest  # Use Ubuntu server
+    
+    steps:
+    # Step 1: Get the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    # Step 2: Setup Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'  # Use Node.js version 18
+    
+    # Step 3: Install backend dependencies
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: npm install
+    
+    # Step 4: Run backend tests (we'll add tests later)
+    - name: Test backend
+      working-directory: ./backend
+      run: echo "Backend tests would run here"
+
+  # Job 2: Test Frontend
+  test-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Step 1: Get the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    # Step 2: Setup Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    # Step 3: Install frontend dependencies
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm install
+    
+    # Step 4: Build the frontend
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+    
+    # Step 5: Run frontend tests
+    - name: Test frontend
+      working-directory: ./frontend
+      run: npm test -- --passWithNoTests
