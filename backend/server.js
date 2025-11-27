@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 
@@ -8,69 +10,70 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-// In-memory data store
-let todos = [
-  { id: 1, text: 'Welcome to your todo app!', completed: false },
-  { id: 2, text: 'Click the circle to complete a task', completed: false },
-  { id: 3, text: 'Hover over a task to delete it', completed: false }
-];
+const Todo = require("./models/Todo");
 
-let nextId = 4;
-
-// Routes
 // Get all todos
-app.get('/api/todos', (req, res) => {
-  res.json(todos);
+app.get("/api/todos", async (req, res) => {
+  try {
+    const todos = await Todo.find();
+    res.json(todos);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // Create a new todo
-app.post('/api/todos', (req, res) => {
-  const { text } = req.body;
-  
-  if (!text || text.trim() === '') {
-    return res.status(400).json({ error: 'Text is required' });
+app.post("/api/todos", async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ error: "Text is required" });
+    }
+
+    const todo = await Todo.create({ text: text.trim() });
+    res.status(201).json(todo);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
-  
-  const newTodo = {
-    id: nextId++,
-    text: text.trim(),
-    completed: false
-  };
-  
-  todos.push(newTodo);
-  res.status(201).json(newTodo);
 });
 
 // Update a todo
-app.put('/api/todos/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const { text, completed } = req.body;
-  
-  const todo = todos.find(t => t.id === id);
-  
-  if (!todo) {
-    return res.status(404).json({ error: 'Todo not found' });
+app.put("/api/todos/:id", async (req, res) => {
+  try {
+    const { text, completed } = req.body;
+    const todo = await Todo.findByIdAndUpdate(
+      req.params.id,
+      { text, completed },
+      { new: true } // return updated object
+    );
+
+    if (!todo) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    res.json(todo);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
-  
-  if (text !== undefined) todo.text = text;
-  if (completed !== undefined) todo.completed = completed;
-  
-  res.json(todo);
 });
 
 // Delete a todo
-app.delete('/api/todos/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const index = todos.findIndex(t => t.id === id);
-  
-  if (index === -1) {
-    return res.status(404).json({ error: 'Todo not not found' });
+app.delete("/api/todos/:id", async (req, res) => {
+  try {
+    const todo = await Todo.findByIdAndDelete(req.params.id);
+    if (!todo) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
-  
-  todos.splice(index, 1);
-  res.status(204).send();
 });
 
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log("DB Error: ", err));
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

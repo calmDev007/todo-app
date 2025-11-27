@@ -266,7 +266,7 @@ export default function TodoApp() {
             <div style={styles.todoList}>
               {todos.map((todo) => (
                 <div
-                  key={todo.id}
+                  key={todo._id}
                   style={styles.todoItem}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
