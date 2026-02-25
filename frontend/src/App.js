@@ -76,7 +76,7 @@ export default function TodoApp() {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete todo');
-      setTodos(todos.filter(t => t.id !== id));
+      setTodos(todos.filter(t => t._id !== id));
       setError(null);
     } catch (err) {
       setError('Failed to delete todo. Please try again.');
@@ -295,7 +295,7 @@ export default function TodoApp() {
                   </span>
                   
                   <button
-                    onClick={() => deleteTodo(todo.id)}
+                    onClick={() => deleteTodo(todo._id)}
                     onMouseEnter={(e) => e.target.style.color = '#ef4444'}
                     onMouseLeave={(e) => e.target.style.color = '#999'}
                     style={styles.deleteButton}
